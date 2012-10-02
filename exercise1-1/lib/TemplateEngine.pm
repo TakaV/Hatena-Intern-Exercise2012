@@ -3,7 +3,7 @@ package TemplateEngine;
 use strict;
 use warnings;
 
-use IO::File;
+use File::Slurp;
 use HTML::Entities;
 
 use Class::Accessor::Lite (
@@ -12,23 +12,14 @@ use Class::Accessor::Lite (
 );
 
 sub render {
-    my ($self, $opts) = @_;
+    my ($self, $context) = @_;
 
-    my $file         = $self->_read;
-    my $encoded_opts = { map { $_ => $self->_escape($opts->{$_}) } keys %$opts };
+    my $file            = read_file($self->file);
+    my $encoded_context = { map { $_ => $self->_escape($context->{$_}) } keys %$context };
 
-    my $result;
-    while (my $l = $file->getline) {
-        $l =~ s/{%\s(.*)\s%}/$encoded_opts->{$1}/g;
+    $file =~ s/{%\s(.*)\s%}/$encoded_context->{$1}/g;
 
-        $result .= $l;
-    }
-
-    return $result;
-}
-
-sub _read {
-    return IO::File->new(shift->{file}, 'r');
+    return $file;
 }
 
 sub _escape {
