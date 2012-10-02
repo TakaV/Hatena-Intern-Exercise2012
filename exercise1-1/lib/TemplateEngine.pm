@@ -15,16 +15,14 @@ use Class::Accessor::Lite (
 sub render {
     my ($self, $context) = @_;
 
+    my $file = read_file($self->file);
+
     for my $key (keys %$context) {
-        if (ref($context->{$key}) eq "ARRAY") {
-            $context->{$key} = $self->_shuffle_text($context->{$key});
-        }
+        $context->{$key} = $self->_shuffle_text($context->{$key});
+        $context->{$key} = $self->_escape($context->{$key});
     }
 
-    my $file            = read_file($self->file);
-    my $encoded_context = { map { $_ => $self->_escape($context->{$_}) } keys %$context };
-
-    $file =~ s/{%\s(.*)\s%}/$encoded_context->{$1}/g;
+    $file =~ s/{%\s(.*)\s%}/$context->{$1}/g;
 
     return $file;
 }
@@ -38,6 +36,7 @@ sub _escape {
 sub _shuffle_text {
     my ($self, $texts) = @_;
 
+    return $texts if ref($texts) ne "ARRAY";
     return [ shuffle @$texts ]->[0];
 }
 
