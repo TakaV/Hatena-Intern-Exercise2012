@@ -2,28 +2,23 @@ var Template = function(input) {
     this.source = input.source;
 };
 
-Template.prototype = {
-    render: function(variables) {
-        var escapeString = function(string) {
-            var escape = function(string) {
-                var data = {
-                    "<" : "&lt;",
-                    ">" : "&gt;",
-                    "&" : "&amp;",
-                    "\"": "&quot;",
-                };
+Template.prototype.render = function(variables) {
+    var replaceSource = this.source.replace(/{%\s(.*)\s%}/g, function(string, part) {
+        return escapeString(variables[part]);
+    });
 
-                return data[string];
-            };
+    return replaceSource;
+};
 
-            return string.replace(/[<>&"]/g, escape);
+var escapeString = function(string) {
+    return string.replace(/[<>&"]/g, function(string) {
+        var data = {
+            "<" : "&lt;",
+            ">" : "&gt;",
+            "&" : "&amp;",
+            "\"": "&quot;",
         };
 
-        var accessValue = function(string, part) {
-            return escapeString(variables[part]);
-        };
-
-        var replaceSource = this.source.replace(/{%\s(.*)\s%}/g, accessValue);
-        return replaceSource;
-    }
+        return data[string];
+    });
 };
