@@ -3,14 +3,15 @@ var Template = function(input) {
 };
 
 Template.prototype.render = function(variables) {
+    var template = this;
     var replaceSource = this.source.replace(/{%\s(.*)\s%}/g, function(string, part) {
-        return escapeString(variables[part]);
+        return template.escapeString(variables[part]);
     });
 
     return replaceSource;
 };
 
-var escapeString = function(string) {
+Template.prototype.escapeString = function(string) {
     return string.replace(/[<>&"]/g, function(string) {
         var data = {
             "<" : "&lt;",
